@@ -1,9 +1,16 @@
 package pl.mfurmane.rest.config;
 
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.core.env.Environment;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -15,10 +22,78 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.sql.DataSource;
+import java.util.Properties;
+
 @Configuration
 @EnableWebSecurity
 @PropertySource(value= {"classpath:application.properties"})
 public class SecurityConfig {
+
+        @Autowired
+        Environment environment;
+
+//    @ConfigurationProperties(prefix = "spring.datasource")
+//    @Bean
+//    @Primary
+//    public DataSource datasource() {
+//        final DriverManagerDataSource dataSource = new DriverManagerDataSource();
+//        dataSource.setDriverClassName(Objects.requireNonNull(environment.getProperty("spring.datasource.driver-class-name")));
+//        dataSource.setUrl();
+//        dataSource.setUsername();
+//        dataSource.setPassword();
+//        return dataSource;
+//    }
+
+    @Bean
+    @Primary
+    public DataSource datasource() {
+        String driver = environment.getProperty("spring.datasource.driver-class-name");
+        String url = environment.getProperty("spring.datasource.url");
+        String username = environment.getProperty("spring.datasource.username");
+        String password = environment.getProperty("spring.datasource.password");
+
+        return DataSourceBuilder.create()
+                .driverClassName(driver)
+                .url(url)
+                .username(username)
+                .password(password)
+                .build();
+    }
+
+    private Properties additionalProperties() {
+        Properties properties = new Properties();
+//        properties.setProperty("spring.jpa.properties.hibernate.temp.use_jdbc_metadata_default", "false");
+//        properties.setProperty("hibernate.temp.use_jdbc_metadata_defaults", "false");
+        properties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
+//        properties.setProperty("hibernate.default_schema", "integr_softmaks");
+//        properties.setProperty("hibernate.physical_naming_strategy", "pl.sciezka.config.CamelCaseToSnakeCaseNamingStrategy");
+        return properties;
+    }
+
+    @Primary
+    @Bean(name = "entityManagerFactory")
+    public LocalContainerEntityManagerFactoryBean entityManagerFactory(@Qualifier("dupaDataSource") DataSource dataSource) {
+        //JpaVendorAdapteradapter can be autowired as well if it's configured in application properties.
+        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+        vendorAdapter.setGenerateDdl(false);
+
+        LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
+        factory.setJpaVendorAdapter(vendorAdapter);
+        //Add package to scan for entities.
+        factory.setPackagesToScan("pl.mfurmane.db");
+        factory.setDataSource(dataSource);
+        factory.setJpaProperties(additionalProperties());
+        return factory;
+    }
+
+    @Bean(name = "entityManager")
+    @Primary
+    public EntityManager entityManager(EntityManagerFactory entityManagerFactory) {
+        return entityManagerFactory.createEntityManager();
+    }
 
 //    @Bean
 //    public DataSource dataSource() {

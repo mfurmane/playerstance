@@ -1,11 +1,10 @@
 package pl.mfurmane.db.dao;
 
+import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import pl.mfurmane.db.dto.QHeroDTO;
 import pl.mfurmane.db.dto.UserDTO;
-
-import javax.persistence.EntityManager;
 
 @Repository
 public class HeroDAO {

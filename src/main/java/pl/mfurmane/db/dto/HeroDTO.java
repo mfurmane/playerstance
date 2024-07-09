@@ -1,7 +1,7 @@
 package pl.mfurmane.db.dto;
 
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name="hero")
@@ -14,8 +14,8 @@ public class HeroDTO implements Comparable<HeroDTO> {
     @Column(name="name", length=100, nullable=false, unique=true)
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private UserDTO user;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    private UserDTO user;
 
     @Override
     public boolean equals(Object o) {
@@ -45,13 +45,13 @@ public class HeroDTO implements Comparable<HeroDTO> {
         this.name = name;
     }
 
-    public UserDTO getUser() {
-        return user;
-    }
-
-    public void setUser(UserDTO user) {
-        this.user = user;
-    }
+//    public UserDTO getUser() {
+//        return user;
+//    }
+//
+//    public void setUser(UserDTO user) {
+//        this.user = user;
+//    }
 
     @Override
     public int compareTo(HeroDTO other) {

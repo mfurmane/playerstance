@@ -1,6 +1,7 @@
 package pl.mfurmane.rest.config;
 
-
+import jakarta.persistence.*;
+import org.hibernate.internal.SessionFactoryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.jdbc.DataSourceBuilder;
@@ -22,8 +23,6 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 import java.util.Properties;
 
@@ -47,13 +46,16 @@ public class SecurityConfig {
 //        return dataSource;
 //    }
 
-    @Bean
     @Primary
+    @Bean(name = "dataSource")
     public DataSource datasource() {
         String driver = environment.getProperty("spring.datasource.driver-class-name");
         String url = environment.getProperty("spring.datasource.url");
         String username = environment.getProperty("spring.datasource.username");
         String password = environment.getProperty("spring.datasource.password");
+
+//        spring.datasource.show-sql=true
+//        spring.datasource.ddl-auto=create
 
         return DataSourceBuilder.create()
                 .driverClassName(driver)
@@ -73,27 +75,48 @@ public class SecurityConfig {
         return properties;
     }
 
-    @Primary
-    @Bean(name = "entityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean entityManagerFactory(@Qualifier("dupaDataSource") DataSource dataSource) {
-        //JpaVendorAdapteradapter can be autowired as well if it's configured in application properties.
-        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-        vendorAdapter.setGenerateDdl(false);
+//    @Primary
+//    @Bean(name = "entityManagerFactory")
+//    public LocalContainerEntityManagerFactoryBean entityManagerFactory(@Qualifier("dataSource") DataSource dataSource) {
+//        //JpaVendorAdapteradapter can be autowired as well if it's configured in application properties.
+//        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+//        vendorAdapter.setGenerateDdl(false);
+//
+//        LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
+//        factory.setJpaVendorAdapter(vendorAdapter);
+//        //Add package to scan for entities.
+//        factory.setPackagesToScan("pl.mfurmane.db");
+//        factory.setDataSource(dataSource);
+//        factory.setJpaProperties(additionalProperties());
+//        return factory;
+//    }
 
-        LocalContainerEntityManagerFactoryBean factory = new LocalContainerEntityManagerFactoryBean();
-        factory.setJpaVendorAdapter(vendorAdapter);
-        //Add package to scan for entities.
-        factory.setPackagesToScan("pl.mfurmane.db");
-        factory.setDataSource(dataSource);
-        factory.setJpaProperties(additionalProperties());
-        return factory;
-    }
+//    @Primary
+//    @Bean(name = "managerFactory")
+//    public EntityManagerFactory entityManagerFactory(@Qualifier("dataSource") DataSource dataSource) {
+//        //JpaVendorAdapteradapter can be autowired as well if it's configured in application properties.
+//        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
+//        vendorAdapter.setGenerateDdl(false);
+//        EntityManagerFactory factory = Persistence.createEntityManagerFactory("org.hibernate.ejb.HibernatePersistence");
+////        factory. JpaVendorAdapter(vendorAdapter);
+////        //Add package to scan for entities.
+////        factory.setPackagesToScan("pl.mfurmane.db");
+////        factory.setDataSource(dataSource);
+////        factory.setJpaProperties(additionalProperties());
+//        return factory;
+//    }
 
-    @Bean(name = "entityManager")
-    @Primary
-    public EntityManager entityManager(EntityManagerFactory entityManagerFactory) {
-        return entityManagerFactory.createEntityManager();
-    }
+//    @Bean//(name = "entityManager")
+//    @Primary
+//    public EntityManager entityManager(@Qualifier("managerFactory") EntityManagerFactory entityManagerFactory) {
+//        return entityManagerFactory.createEntityManager();
+//    }
+
+//    @Bean//(name = "entityManager")
+//    @Primary
+//    public PersistenceUnit persistenceUnit() {
+//        return new PersistenceUnit
+//    }
 
 //    @Bean
 //    public DataSource dataSource() {

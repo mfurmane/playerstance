@@ -7,7 +7,7 @@ import pl.mfurmane.db.dto.PlayerDTO;
 import pl.mfurmane.rest.model.LoginRequest;
 import pl.mfurmane.rest.model.LoginResponse;
 import pl.mfurmane.rest.model.RegisterRequest;
-import pl.mfurmane.rest.model.RegisterResponse;
+import pl.mfurmane.rest.model.RestPlayer;
 import pl.mfurmane.rest.services.CurrentUserService;
 
 @RestController
@@ -31,7 +31,7 @@ public class CurrentUserController {
 
     @PostMapping(value = "/register")
     @ResponseStatus(HttpStatus.OK)
-    public PlayerDTO register(@RequestBody RegisterRequest request) {
+    public RestPlayer register(@RequestBody RegisterRequest request) {
         return service.registerPlayer(request);
     }
 

@@ -25,10 +25,15 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import pl.mfurmane.rest.model.Role;
 import pl.mfurmane.rest.utils.ApiAuthenticationProvider;
 
 import javax.sql.DataSource;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Properties;
 
 @Configuration
@@ -36,8 +41,11 @@ import java.util.Properties;
 @PropertySource(value= {"classpath:application.properties"})
 public class SecurityConfig {
 
-        @Autowired
-        Environment environment;
+    @Autowired
+    Environment environment;
+
+//    @Autowired
+//    private SecurityContextRepository securityContextRepository;
 
     @Primary
     @Bean(name = "dataSource")
@@ -76,44 +84,45 @@ public class SecurityConfig {
     }
 
     @Bean
+    public SecurityContextRepository securityContextRepository() {
+        return new HttpSessionSecurityContextRepository();
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/login", "/register").permitAll()
-                        .requestMatchers("/api/**").authenticated()
-                        .anyRequest().hasRole("ADMIN")
+        http.cors(httpSecurityCorsConfigurer -> httpSecurityCorsConfigurer.configurationSource(corsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(authorize -> {
+                    System.out.println("Security filter chain start");
+//                    System.out.println(""+authorize.requestMatchers("/api/**"));
+//                    System.out.println(""+authorize.requestMatchers("/api/**").authenticated());
+
+                    authorize
+                                    .requestMatchers("/login", "/register").permitAll()
+//                                    .requestMatchers("/api/**").authenticated()
+                                    .requestMatchers("/api/**").hasAnyRole("ADMIN", "USER")
+                                    .anyRequest().hasRole("ADMIN");
+                        }
                 );
-        SecurityContextRepository repo =
-                new HttpSessionSecurityContextRepository();
+//        SecurityContextRepository repo =
+//                new HttpSessionSecurityContextRepository();
         http.securityContext((context) -> context
-                .securityContextRepository(repo));
+                .securityContextRepository(securityContextRepository()));
 
         return http.build();
 
-//                http.csrf()
-//                .disable()
-//                .authorizeRequests()
-//                .requestMatchers("/admin/**")
-//                .hasRole("ADMIN")
-//                .requestMatchers("/anonymous*")
-//                .anonymous()
-//                .requestMatchers("/login*")
-//                .permitAll()
-//                .anyRequest()
-//                .authenticated();
-////                .and()
-////                .formLogin()
-////                .loginPage("/login.html")
-////                .loginProcessingUrl("/perform_login")
-////                .defaultSuccessUrl("/homepage.html", true)
-////                .failureUrl("/login.html?error=true")
-////                .failureHandler(authenticationFailureHandler())
-////                .and()
-////                .logout()
-////                .logoutUrl("/perform_logout")
-////                .deleteCookies("JSESSIONID")
-////                .logoutSuccessHandler(logoutSuccessHandler());
-//        return http.build();
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+//        configuration.setAllowedOrigins(Collections.singletonList("http://localhost:8000")); // todo properties by environment
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "DELETE", "PUT"));
+        configuration.setAllowedHeaders(Arrays.asList("X-Requested-With", "Origin", "Content-Type", "Accept", "Authorization"));
+        configuration.setAllowCredentials(true);
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     @Bean

@@ -31,6 +31,7 @@ public class ApiAuthenticationProvider implements AuthenticationProvider {
             if (player == null) {
                 throw new IllegalArgumentException("player don't exist");
             }
+            System.out.println("Compare passwords:/n" +password + "/n" + player.getPassword());
             boolean passwordIncorrect = !player.getPassword().equals(password);
             if (passwordIncorrect) {
                 throw new IllegalArgumentException("incorrect password");

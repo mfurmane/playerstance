@@ -19,9 +19,15 @@ public class CurrentUserController {
     @Autowired
     private CurrentUserService service;
 
-    @GetMapping(value = "/api/{name}")
+    @GetMapping(value = "/api/chuj")
     @ResponseStatus(HttpStatus.OK)
-    public String greetingText(@PathVariable String name) {
+    public String greetingText(@RequestBody String name) {
+        return "Hello " + name + "!";
+    }
+
+    @GetMapping(value = "/chuj/bezapi")
+    @ResponseStatus(HttpStatus.OK)
+    public String greetingText2(@RequestBody String name) {
         return "Hello " + name + "!";
     }
 

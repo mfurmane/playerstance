@@ -40,8 +40,9 @@ public class CurrentUserService {
     @Autowired
     private ApiAuthenticationProvider authManager;
 
-    private final SecurityContextRepository securityContextRepository =
-            new HttpSessionSecurityContextRepository();
+    @Autowired
+    private SecurityContextRepository securityContextRepository;
+//            = new HttpSessionSecurityContextRepository();
     private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
 
 
@@ -56,9 +57,11 @@ public class CurrentUserService {
             Authentication auth = authManager.authenticate(authReq);
 //            SecurityContext context = securityContextHolderStrategy.createEmptyContext();
 //            context.setAuthentication(auth);
-        securityContext().setAuthentication(auth);
-            securityContextHolderStrategy.setContext(securityContext());
-            securityContextRepository.saveContext(securityContext(), request, responsee);
+//        SecurityContext context = securityContext();
+        SecurityContext context = securityContextHolderStrategy.createEmptyContext();
+        context.setAuthentication(auth);
+            securityContextHolderStrategy.setContext(context);
+            securityContextRepository.saveContext(context, request, responsee);
 
         String sessionId = RequestContextHolder.currentRequestAttributes().getSessionId();
 //        System.out.println("SESSION " + sessionId);

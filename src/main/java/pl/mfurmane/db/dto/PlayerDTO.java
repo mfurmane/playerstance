@@ -1,6 +1,8 @@
 package pl.mfurmane.db.dto;
 
 import jakarta.persistence.*;
+import pl.mfurmane.rest.model.Role;
+
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -15,8 +17,11 @@ public class PlayerDTO {
     @Column(name="email", length=100, nullable=false, unique=true)
     private String email;
 
-    @Column(name="password", length=100, nullable=false, unique=true)
+    @Column(name="password", length=100, nullable=false)
     private String password;
+
+    @Column(name="role", nullable=false)
+    private String role;
 
     @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<HeroDTO> heroes = new TreeSet<>();
@@ -24,9 +29,16 @@ public class PlayerDTO {
     public PlayerDTO() {
     }
 
+    public PlayerDTO(String email, String password, String role) {
+        this.email = email;
+        this.password = password;
+        this.role = role;
+    }
+
     public PlayerDTO(String email, String password) {
         this.email = email;
         this.password = password;
+        this.role = "USER";
     }
 
     public void addHero(HeroDTO hero) {
@@ -69,5 +81,13 @@ public class PlayerDTO {
 
     public void setHeroes(Set<HeroDTO> heroes) {
         this.heroes = heroes;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

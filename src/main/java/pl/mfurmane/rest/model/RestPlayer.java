@@ -4,6 +4,7 @@ public class RestPlayer {
     private String id;
     private String email;
     private String password;
+    private String session;
 
     public String getId() {
         return id;
@@ -27,5 +28,13 @@ public class RestPlayer {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public String getSession() {
+        return session;
+    }
+
+    public void setSession(String session) {
+        this.session = session;
     }
 }

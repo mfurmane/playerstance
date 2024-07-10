@@ -1,5 +1,7 @@
 package pl.mfurmane.rest.controllers;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -25,13 +27,13 @@ public class CurrentUserController {
 
     @PostMapping(value = "/login")
     @ResponseStatus(HttpStatus.OK)
-    public LoginResponse login(@RequestBody LoginRequest request) {
-        return service.login(request);
+    public LoginResponse login(@RequestBody LoginRequest request, HttpServletRequest servletRequest, HttpServletResponse response) {
+        return service.login(request, servletRequest, response);
     }
 
     @PostMapping(value = "/register")
     @ResponseStatus(HttpStatus.OK)
-    public RestPlayer register(@RequestBody RegisterRequest request) {
+    public RestPlayer register(@RequestBody RegisterRequest request, HttpServletRequest servletRequest, HttpServletResponse response) {
         return service.registerPlayer(request);
     }
 

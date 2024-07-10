@@ -1,12 +1,19 @@
 package pl.mfurmane.rest.services;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.context.SecurityContextHolderStrategy;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
 import pl.mfurmane.db.dao.PlayerDAO;
 import pl.mfurmane.db.dto.PlayerDTO;
 import pl.mfurmane.rest.model.LoginRequest;
@@ -33,30 +40,38 @@ public class CurrentUserService {
     @Autowired
     private ApiAuthenticationProvider authManager;
 
-    public LoginResponse login(LoginRequest request) {
+    private final SecurityContextRepository securityContextRepository =
+            new HttpSessionSecurityContextRepository();
+    private final SecurityContextHolderStrategy securityContextHolderStrategy = SecurityContextHolder.getContextHolderStrategy();
+
+
+    public LoginResponse login(LoginRequest loginRequest, HttpServletRequest request, HttpServletResponse responsee) {
+        //, String email, String password
         Objects.requireNonNull(request, "request can't be null");
-        System.out.println(securityContext().getAuthentication());
+        System.out.println("SESSION " + RequestContextHolder.currentRequestAttributes().getSessionId());
+        String email = decrypt(loginRequest.getEmail(), "email can't be null");
+        String password = decrypt(loginRequest.getPassword(), "password can't be null");
 
-
-        String email = decrypt(request.getEmail(), "email can't be null");
-        String password = decrypt(request.getPassword(), "password can't be null");
-
-        PlayerDTO player = dao.byEmail(email);
-        if (player == null) {
-            throw new IllegalArgumentException("player don't exist");
-        }
-        boolean passwordCorrect = player.getPassword().equals(password);
-        if (passwordCorrect) {
-            UsernamePasswordAuthenticationToken authReq
-                    = new UsernamePasswordAuthenticationToken(email, password);
+        UsernamePasswordAuthenticationToken authReq = UsernamePasswordAuthenticationToken.unauthenticated(email, password);
             Authentication auth = authManager.authenticate(authReq);
-            securityContext().setAuthentication(auth);
+//            SecurityContext context = securityContextHolderStrategy.createEmptyContext();
+//            context.setAuthentication(auth);
+        securityContext().setAuthentication(auth);
+            securityContextHolderStrategy.setContext(securityContext());
+            securityContextRepository.saveContext(securityContext(), request, responsee);
 
-            LoginResponse response = new LoginResponse(authReq);
+        String sessionId = RequestContextHolder.currentRequestAttributes().getSessionId();
+//        System.out.println("SESSION " + sessionId);
+
+
+//            request.getSession(true).setAttribute("SPRING_SECURITY_CONTEXT", securityContext());
+
+            LoginResponse response = new LoginResponse(sessionId);
+
             return response;
-        } else {
-            throw new IllegalArgumentException("incorrect password");
-        }
+//        } else {
+//            throw new IllegalArgumentException("incorrect password");
+//        }
     }
 
     private static SecurityContext securityContext() {
@@ -64,6 +79,7 @@ public class CurrentUserService {
     }
 
     public RestPlayer registerPlayer(RegisterRequest request) {
+        System.out.println("SESSION " + RequestContextHolder.currentRequestAttributes().getSessionId());
         Objects.requireNonNull(request, "request can't be null");
         String email = validateEmail(request.getEmail());
         String password = validatePassword(request.getPassword());
@@ -78,11 +94,13 @@ public class CurrentUserService {
     }
 
     private RestPlayer encryptPlayer(PlayerDTO player) {
+        Decryptor decryptor = new Decryptor();
         RestPlayer output = new RestPlayer();
         String secret = sessionToken();
-        output.setEmail(Decryptor.encrypt(player.getEmail(), secret));
-        output.setPassword(Decryptor.encrypt(player.getPassword(), secret));
-        output.setId(Decryptor.encrypt(String.valueOf(player.getId()), secret));
+        output.setEmail(decryptor.encrypt(player.getEmail()));
+        output.setPassword(decryptor.encrypt(player.getPassword()));
+        output.setId(decryptor.encrypt(String.valueOf(player.getId())));
+        output.setSession(RequestContextHolder.currentRequestAttributes().getSessionId());
         return output;
     }
 
@@ -109,8 +127,9 @@ public class CurrentUserService {
     }
 
     private String decrypt(String input, String message) {
+        Decryptor decryptor = new Decryptor();
         Objects.requireNonNull(input, message);
-        return Decryptor.decrypt(input, sessionToken());
+        return decryptor.decrypt(input);
     }
 
     private static String hashPassword(String password) {

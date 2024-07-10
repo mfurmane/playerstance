@@ -4,17 +4,17 @@ import org.springframework.security.core.Authentication;
 
 public class LoginResponse {
 
-    private Authentication authToken;
+    private String authToken;
 
-    public Authentication getAuthToken() {
+    public String getAuthToken() {
         return authToken;
     }
 
-    public void setAuthToken(Authentication authToken) {
+    public void setAuthToken(String authToken) {
         this.authToken = authToken;
     }
 
-    public LoginResponse(Authentication sessionToken) {
+    public LoginResponse(String sessionToken) {
         this.authToken = sessionToken;
     }
 

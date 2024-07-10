@@ -14,8 +14,8 @@ public class HeroDTO implements Comparable<HeroDTO> {
     @Column(name="name", length=100, nullable=false, unique=true)
     private String name;
 
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    private UserDTO user;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private PlayerDTO player;
 
     @Override
     public boolean equals(Object o) {
@@ -45,13 +45,13 @@ public class HeroDTO implements Comparable<HeroDTO> {
         this.name = name;
     }
 
-//    public UserDTO getUser() {
-//        return user;
-//    }
-//
-//    public void setUser(UserDTO user) {
-//        this.user = user;
-//    }
+    public PlayerDTO getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(PlayerDTO player) {
+        this.player = player;
+    }
 
     @Override
     public int compareTo(HeroDTO other) {

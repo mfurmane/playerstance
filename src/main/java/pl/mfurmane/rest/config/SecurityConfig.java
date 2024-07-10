@@ -231,8 +231,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers(new AntPathRequestMatcher("/login")).permitAll()
-                        .requestMatchers(new AntPathRequestMatcher("/api/**")).authenticated()
+                        .requestMatchers("/login", "/register").permitAll()
+                        .requestMatchers("/api/**").authenticated()
                         .anyRequest().hasRole("ADMIN")
                 );
 

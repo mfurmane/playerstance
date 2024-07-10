@@ -27,6 +27,10 @@
       <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
     <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.liquibase</groupId>
       <artifactId>liquibase-core</artifactId>
     </dependency>
@@ -54,6 +58,13 @@
       <classifier>jakarta</classifier>
     </dependency>
 
+    <dependency>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+<!--      <version>6.1.0</version>-->
+<!--      <scope>provided</scope>-->
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -78,7 +89,7 @@
             <path>
               <groupId>jakarta.persistence</groupId>
               <artifactId>jakarta.persistence-api</artifactId>
-<!--              <version>3.0.0</version>-->
+              <version>3.1.0</version>
             </path>
           </annotationProcessorPaths>
         </configuration>

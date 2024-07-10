@@ -5,8 +5,8 @@ import java.util.Set;
 import java.util.TreeSet;
 
 @Entity
-@Table(name="user")
-public class UserDTO {
+@Table(name="player")
+public class PlayerDTO {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
@@ -18,18 +18,26 @@ public class UserDTO {
     @Column(name="password", length=100, nullable=false, unique=true)
     private String password;
 
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private Set<HeroDTO> heroes = new TreeSet<>();
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<HeroDTO> heroes = new TreeSet<>();
 
-//    public void addComment(HeroDTO comment) {
-//        heroes.add(comment);
-//        comment.setUser(this);
-//    }
-//
-//    public void removeComment(HeroDTO comment) {
-//        heroes.remove(comment);
-//        comment.setUser(null);
-//    }
+    public PlayerDTO() {
+    }
+
+    public PlayerDTO(String email, String password) {
+        this.email = email;
+        this.password = password;
+    }
+
+    public void addHero(HeroDTO hero) {
+        heroes.add(hero);
+        hero.setPlayer(this);
+    }
+
+    public void removeHero(HeroDTO hero) {
+        heroes.remove(hero);
+        hero.setPlayer(null);
+    }
 
     public long getId() {
         return id;
@@ -55,11 +63,11 @@ public class UserDTO {
         this.password = password;
     }
 
-//    public Set<HeroDTO> getHeroes() {
-//        return heroes;
-//    }
-//
-//    public void setHeroes(Set<HeroDTO> heroes) {
-//        this.heroes = heroes;
-//    }
+    public Set<HeroDTO> getHeroes() {
+        return heroes;
+    }
+
+    public void setHeroes(Set<HeroDTO> heroes) {
+        this.heroes = heroes;
+    }
 }
